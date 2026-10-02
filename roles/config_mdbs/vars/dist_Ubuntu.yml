@@ -1,0 +1,5 @@
+---
+
+config_mdbs_server_cnf: /etc/mysql/mariadb.conf.d/50-server.cnf
+
+config_mdbs_service: mariadb

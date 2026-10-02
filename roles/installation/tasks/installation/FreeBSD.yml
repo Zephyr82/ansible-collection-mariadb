@@ -1,0 +1,9 @@
+---
+
+- name: Ensure MariaDB server and corresponding packages are installed on FreeBSD
+  community.general.pkgng:
+    pkg: "{{ installation_packages }}"
+    state: present
+  become: true
+  tags:
+    - mariadb_installation

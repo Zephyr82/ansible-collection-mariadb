@@ -1,0 +1,7 @@
+---
+# defaults file for zephyr82.mariadb.config_mdbs
+
+# Variable that will be displayed in debug output
+# This demonstrates proper role variable naming with the 'run_' prefix
+config_mdbs_server_socket: "/run/mysqld/mysqld.sock"
+config_mdbs_server_user: "root"

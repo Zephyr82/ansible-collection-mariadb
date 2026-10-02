@@ -1,0 +1,8 @@
+---
+
+installation_packages:
+  - mariadb-server
+  - python3-cryptography
+  - python3-pymysql
+
+installation_mariadb_service: mariadb

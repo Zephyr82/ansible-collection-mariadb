@@ -1,0 +1,9 @@
+---
+
+- name: Ensure MariaDB server and corresponding packages are installed
+  ansible.builtin.package:
+    name: '{{ installation_packages }}'
+    state: present
+  become: true
+  tags:
+    - mariadb_installation

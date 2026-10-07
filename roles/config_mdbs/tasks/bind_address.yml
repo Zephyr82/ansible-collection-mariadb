@@ -1,0 +1,26 @@
+---
+
+- name: Configure MariaDB server to listen on following hostname
+  ansible.builtin.lineinfile:
+    line: "bind-address            = {{ ansible_facts['fqdn'] }}"
+    path: "{{ config_mdbs_server_cnf }}"
+    regexp: "bind-address"
+    state: "present"
+  become: true
+  notify: Restart MariaDB server
+  tags:
+    - mariadb_configuration
+
+- name: Assert that the MariaDB server is already reading the correct value of 'bind-address' in the server.cnf
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      mariadbd --verbose --help | grep -e ^bind-address
+  args:
+    executable: /usr/bin/bash
+  failed_when: "ansible_facts['fqdn'] not in _config_mdbs_bind_address_myconf.stdout"
+  changed_when: false
+  become: true
+  register: _config_mdbs_bind_address_myconf
+  tags:
+    - mariadb_configuration

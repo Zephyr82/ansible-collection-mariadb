@@ -11,45 +11,16 @@
   tags:
     - always
 
-- name: Configure MariaDB server to listen on following hostname
-  ansible.builtin.lineinfile:
-    line: "bind-address            = {{ ansible_facts['fqdn'] }}"
-    path: "{{ config_mdbs_server_cnf }}"
-    regexp: "bind-address"
-    state: "present"
-  become: true
-  notify: Restart MariaDB server
+- name: Include tasks for configuring MariaDB bind-address
+  ansible.builtin.include_tasks:
+    file: bind_address.yml
   tags:
     - mariadb_configuration
+    - debug
 
-- name: Assert that the MariaDB server is already reading the correct value of 'bind-address' in the server.cnf
-  ansible.builtin.shell:
-    cmd: |
-      set -o pipefail
-      mariadbd --verbose --help | grep -e ^bind-address
-  args:
-    executable: /usr/bin/bash
-  failed_when: "ansible_facts['fqdn'] not in _config_mdbs_bind_address_myconf.stdout"
-  changed_when: false
-  become: true
-  register: _config_mdbs_bind_address_myconf
+- name: Include tasks for configuring MariaDB event_scheduler
+  ansible.builtin.include_tasks:
+    file: event_scheduler.yml
   tags:
     - mariadb_configuration
-
-- name: Assert that the MariaDB server is now listening on the hostname
-  ansible.mariadb.mariadb_info:
-    login_unix_socket: "{{ config_mdbs_server_socket }}"
-    login_user: "{{ config_mdbs_server_user }}"
-    filter:
-      - settings
-  become: true
-  failed_when: "ansible_facts['fqdn'] not in _config_mdbs_bind_address_servvar['settings']['bind_address']"
-  register: _config_mdbs_bind_address_servvar
-  tags:
-    - mariadb_configuration
-
-- name: Show value of 'bind-address' from MariaDB server settings
-  ansible.builtin.debug:
-    msg: "{{ _config_mdbs_bind_address_servvar['settings']['bind_address'] }}"
-  tags:
     - debug

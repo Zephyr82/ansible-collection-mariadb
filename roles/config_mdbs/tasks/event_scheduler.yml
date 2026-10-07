@@ -1,0 +1,29 @@
+---
+
+- name: Set MariaDB event_scheduler to ON resp. OFF in the server.cnf
+  ansible.builtin.lineinfile:
+    path: "{{ config_mdbs_server_cnf }}"
+    regexp: "event_scheduler"
+    line: "{% if config_mdbs_event_scheduler == 'ON' %}event_scheduler                 = ON{% else %}# event_scheduler                 = OFF{% endif %}"
+    insertafter: "[mariadb]"
+    state: "present"
+  become: true
+  notify: Restart MariaDB server
+  tags:
+    - mariadb_configuration
+
+- name: Assert that the MariaDB server is already reading the correct value of 'event_scheduler' in the server.cnf
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      mariadbd --verbose --help | grep -e ^event-scheduler
+  args:
+    executable: /usr/bin/bash
+  failed_when: >
+    'event-scheduler' not in _config_mdbs_event_scheduler.stdout and
+    config_mdbs_event_scheduler not in _config_mdbs_event_scheduler.stdout
+  changed_when: false
+  become: true
+  register: _config_mdbs_event_scheduler
+  tags:
+    - mariadb_configuration

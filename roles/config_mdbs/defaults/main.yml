@@ -5,3 +5,5 @@
 # This demonstrates proper role variable naming with the 'run_' prefix
 config_mdbs_server_socket: "/run/mysqld/mysqld.sock"
 config_mdbs_server_user: "root"
+
+config_mdbs_event_scheduler: "OFF"  # Possible values: "ON" or "OFF"

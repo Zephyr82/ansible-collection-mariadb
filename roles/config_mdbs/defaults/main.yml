@@ -6,4 +6,4 @@
 config_mdbs_server_socket: "/run/mysqld/mysqld.sock"
 config_mdbs_server_user: "root"
 
-config_mdbs_event_scheduler: "OFF"  # Possible values: "ON" or "OFF"
+config_mdbs_event_scheduler: "ON"  # Possible values: "ON" or "OFF"

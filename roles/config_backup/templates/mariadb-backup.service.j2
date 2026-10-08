@@ -1,0 +1,27 @@
+[Unit]
+Description={{ config_backup_service_description | default('backup task for MariaDB') }}
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{ config_backup_service_user | default('backup') }}
+{% if config_backup_service_group is defined and config_backup_service_group | length > 0 %}Group={{ config_backup_service_group | default('root') }}{% endif %}
+ExecStart={{ config_backup_service_exec_start }}
+{% if config_backup_service_environment is defined %}
+{% for key, value in config_backup_service_environment.items() %}
+Environment="{{ key }}={{ value }}"
+{% endfor %}
+{% endif %}
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier={{ config_backup_service_name }}
+
+{% if config_backup_service_nice is defined %}
+Nice={{ config_backup_service_nice }}
+{% endif %}
+{% if config_backup_service_io_scheduling_class is defined %}
+IOSchedulingClass={{ config_backup_service_io_scheduling_class }}
+{% endif %}

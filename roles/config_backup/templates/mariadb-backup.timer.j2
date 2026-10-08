@@ -1,0 +1,39 @@
+[Unit]
+Description=Timer for {{ config_backup_service_description | default(config_backup_timer_description) }}
+
+[Timer]
+{% if config_backup_timer_on_calendar is defined %}
+# Calendar-based schedule (like cron)
+OnCalendar={{ config_backup_timer_on_calendar }}
+{% endif %}
+{% if config_backup_timer_on_boot_sec is defined %}
+# Run this many seconds after boot
+OnBootSec={{ config_backup_timer_on_boot_sec }}
+{% endif %}
+{% if config_backup_timer_on_unit_active_sec is defined %}
+# Run this often after the unit was last activated
+OnUnitActiveSec={{ config_backup_timer_on_unit_active_sec }}
+{% endif %}
+{% if config_backup_timer_on_unit_inactive_sec is defined %}
+# Run this often after the unit became inactive
+OnUnitInactiveSec={{ config_backup_timer_on_unit_inactive_sec }}
+{% endif %}
+
+# Catch up on missed calendar runs after downtime
+Persistent={{ config_backup_timer_persistent | default('true') }}
+
+# Randomize delay to avoid thundering herd
+{% if config_backup_timer_randomized_delay_sec is defined %}
+RandomizedDelaySec={{ config_backup_timer_randomized_delay_sec }}
+{% endif %}
+
+# Accuracy (lower = more precise but more wake-ups)
+AccuracySec={{ config_backup_timer_accuracy_sec | default('60') }}
+
+{% if config_backup_service_name is defined and config_backup_service_name | length > 0 %}
+# Override default unit to trigger
+Unit={{ config_backup_service_name }}
+{% endif %}
+
+[Install]
+WantedBy=timers.target

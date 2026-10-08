@@ -1,0 +1,62 @@
+---
+
+- name: Ensure that _host, _user, _password and _script_local_path variables are set for the config backup script
+  ansible.builtin.assert:
+    that:
+      - config_backup_script_local_path is defined and config_backup_script_local_path | length > 0
+      - config_backup_script_mariadb_host is defined and config_backup_script_mariadb_host | length > 0
+      - config_backup_script_mariadb_user is defined and config_backup_script_mariadb_user | length > 0
+      - config_backup_script_mariadb_password is defined and config_backup_script_mariadb_password | length > 0
+    fail_msg: "The variables config_backup_script_mariadb_host, config_backup_script_mariadb_user, and config_backup_script_mariadb_password must be defined."
+  tags:
+    - mariadb_backup
+
+- name: Copy config backup script to target host
+  ansible.builtin.copy:
+    src: "{{ config_backup_script_local_path | default('mariadb-backup.sh') }}"
+    dest: "{{ config_backup_script_path }}"
+    owner: "{{ config_backup_script_owner }}"
+    group: "{{ config_backup_script_group }}"
+    mode: "{{ config_backup_script_mode }}"
+  become: true
+  tags:
+    - mariadb_backup
+
+- name: List variables for configuring the backup script
+  ansible.builtin.debug:
+    msg: "{{ item.key }}={{ item.value }}"
+  loop:
+    - { key: "MARIADB_HOST", value: "{{ config_backup_script_mariadb_host }}" }
+    - { key: "MARIADB_USER", value: "{{ config_backup_script_mariadb_user }}" }
+    - { key: "MARIADB_PASSWORD", value: "{{ config_backup_script_mariadb_password }}" }
+    - { key: "MARIADB_DATABASES", value: "{{ config_backup_script_mariadb_databases }}" }
+    - { key: "MYSQLDUMP_EXTRA_OPTS", value: "{{ config_backup_script_mysqldump_extra_opts }}" }
+    - { key: "MYSQLDUMP_GRANTS_OPTS", value: "{{ config_backup_script_mysqldump_grants_opts }}" }
+    - { key: "BACKUP_DIR", value: "{{ config_backup_dir }}" }
+    - { key: "BACKUP_KEEP_MINS", value: "{{ config_backup_script_mariadb_keep_mins }}" }
+    - { key: "BACKUP_KEEP_DAYS", value: "{{ config_backup_script_mariadb_keep_days }}" }
+    - { key: "BACKUP_KEEP_WEEKS", value: "{{ config_backup_script_mariadb_keep_weeks }}" }
+    - { key: "BACKUP_KEEP_MONTHS", value: "{{ config_backup_script_mariadb_keep_months }}" }
+  tags:
+    - mariadb_backup
+
+- name: Configure MariaDB backup script
+  ansible.builtin.lineinfile:
+    path: "{{ config_backup_script_path }}"
+    regexp: "^{{ item.key }}="
+    line: "{% if item.key == 'MARIADB_PASSWORD' %}{{ item.key }}='{{ item.value }}'{% else %}{{ item.key }}=\"{{ item.value }}\"{% endif %}"
+  loop:
+    - { key: "MARIADB_HOST", value: "{{ config_backup_script_mariadb_host }}" }
+    - { key: "MARIADB_USER", value: "{{ config_backup_script_mariadb_user }}" }
+    - { key: "MARIADB_PASSWORD", value: "{{ config_backup_script_mariadb_password }}" }
+    - { key: "MARIADB_DATABASES", value: "{{ config_backup_script_mariadb_databases }}" }
+    - { key: "MYSQLDUMP_EXTRA_OPTS", value: "{{ config_backup_script_mysqldump_extra_opts }}" }
+    - { key: "MYSQLDUMP_GRANTS_OPTS", value: "{{ config_backup_script_mysqldump_grants_opts }}" }
+    - { key: "BACKUP_DIR", value: "{{ config_backup_dir }}" }
+    - { key: "BACKUP_KEEP_MINS", value: "{{ config_backup_script_mariadb_keep_mins }}" }
+    - { key: "BACKUP_KEEP_DAYS", value: "{{ config_backup_script_mariadb_keep_days }}" }
+    - { key: "BACKUP_KEEP_WEEKS", value: "{{ config_backup_script_mariadb_keep_weeks }}" }
+    - { key: "BACKUP_KEEP_MONTHS", value: "{{ config_backup_script_mariadb_keep_months }}" }
+  become: true
+  tags:
+    - mariadb_backup

@@ -1,0 +1,12 @@
+---
+# tasks file for zephyr82.mariadb.config_backup
+
+- name: Configure the MariaDB backup script
+  ansible.builtin.include_tasks: backup_script.yml
+  tags:
+    - mariadb_backup
+
+- name: Configure the systemd service and timer for the MariaDB backup script
+  ansible.builtin.include_tasks: service_timer.yml
+  tags:
+    - mariadb_backup

@@ -1,0 +1,42 @@
+---
+
+- name: Configure systemd service unit for MariaDB backup script
+  ansible.builtin.template:
+    src: "mariadb-backup.service.j2"
+    dest: "/etc/systemd/system/{{ config_backup_service_name }}.service"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  notify:
+    - Reload systemd
+  tags:
+    - mariadb_backup
+
+- name: Configure systemd timer unit for MariaDB backup script
+  ansible.builtin.template:
+    src: "mariadb-backup.timer.j2"
+    dest: "/etc/systemd/system/{{ config_backup_service_name }}.timer"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  become: true
+  notify:
+    - Reload systemd
+  tags:
+    - mariadb_backup
+
+- name: Flush handlers to ensure systemd is reloaded before enabling the timer
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - mariadb_backup
+
+- name: Enable and start systemd timer for MariaDB backup script
+  ansible.builtin.systemd:
+    name: "{{ config_backup_service_name }}.timer"
+    enabled: "{{ config_backup_service_timer_enabled | default(true) }}"
+    state: started
+    daemon_reload: true
+  become: true
+  tags:
+    - mariadb_backup

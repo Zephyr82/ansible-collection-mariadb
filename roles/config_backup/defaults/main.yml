@@ -1,0 +1,30 @@
+---
+# defaults file for zephyr82.mariadb.config_backup
+
+
+config_backup_dir: "/var/backups/mariadb"
+config_backup_script_local_path:
+config_backup_script_path: "/usr/bin/mariadb-backup.sh"
+config_backup_script_owner: "root"
+config_backup_script_group: "backup"
+config_backup_script_mode: "0750"
+
+# variables for configuring the backup script itself, these can be overridden in the playbook or inventory
+config_backup_script_mariadb_host: "localhost"
+config_backup_script_mariadb_user: "backup"
+config_backup_script_mariadb_password:
+config_backup_script_mariadb_databases: ""
+config_backup_script_mysqldump_extra_opts: "--routines --triggers --events --single-transaction --quick"
+config_backup_script_mysqldump_grants_opts: "--single-transaction --quick --system=users"
+config_backup_script_mariadb_keep_mins: 1440
+config_backup_script_mariadb_keep_days: 7
+config_backup_script_mariadb_keep_weeks: 4
+config_backup_script_mariadb_keep_months: 6
+
+# variables for configuring the systemd service unit for the backup script, these can be overridden in the playbook or inventory
+config_backup_service_name: "mariadb-backup"
+config_backup_service_description: "backup task for MariaDB"
+config_backup_service_exec_start: "{{ config_backup_script_path }}"
+config_backup_timer_on_calendar: "*-*-* 00:15:00"
+config_backup_timer_randomized_delay_sec: "1200"
+config_backup_timer_accuracy_sec: "5min"

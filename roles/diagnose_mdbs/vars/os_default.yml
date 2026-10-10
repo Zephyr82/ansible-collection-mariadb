@@ -1,0 +1,4 @@
+---
+
+# file is only here to make sure that the include_vars task in roles/diagnose_mdbs/tasks/main.yml
+# can find a default file to include if no OS specific file is found

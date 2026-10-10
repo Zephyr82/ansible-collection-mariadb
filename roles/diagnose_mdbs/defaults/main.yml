@@ -1,0 +1,8 @@
+---
+# defaults file for zephyr82.mariadb.diagnose_mdbs
+
+diagnose_mdbs_servvars:
+  - "databases"
+  - "settings":
+      - "bind_address"
+      - "event_scheduler"

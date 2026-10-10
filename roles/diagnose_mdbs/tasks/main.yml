@@ -1,0 +1,47 @@
+---
+# tasks file for zephyr82.mariadb.diagnose_mdbs
+
+- name: Include OS specific variables
+  ansible.builtin.include_vars:
+    file: "{{ item }}"
+  with_first_found:
+    - "os_{{ ansible_facts['os_family'] }}.yml"
+    - "dist_{{ ansible_facts['distribution'] }}.yml"
+    - "os_default.yml"
+  tags:
+    - always
+
+- name: Get values of all MariaDB server variables
+  ansible.mariadb.mariadb_info:
+    login_unix_socket: "{{ mariadb_login_unix_socket }}"
+    login_user: "{{ mariadb_login_user }}"
+  become: true
+  register: _diagnose_mdbs_servvars
+  tags:
+    - mariadb_diagnose
+
+- name: Show values of complete MariaDB server sections
+  ansible.builtin.debug:
+    msg: "{{ {item: _diagnose_mdbs_servvars.mariadb_info[item] | default('NOT FOUND in mariadb_info output')} }}"
+  loop: "{{ diagnose_mdbs_servvars | select('string') | list }}"
+  loop_control:
+    label: "{{ item }}"
+  tags:
+    - mariadb_diagnose
+
+- name: Show values of selected MariaDB server
+  ansible.builtin.debug:
+    msg: "{{ { item.key: _diagnose_mdbs_selected } }}"
+  vars:
+    _diagnose_mdbs_section: "{{ _diagnose_mdbs_servvars.mariadb_info[item.key] | default(none) }}"
+    _diagnose_mdbs_selected: >-
+      {{ _diagnose_mdbs_section | dict2items | selectattr('key', 'in', item.value) | items2dict
+         if _diagnose_mdbs_section is mapping else
+         _diagnose_mdbs_section | select('mapping') | map('dict2items') | map('selectattr', 'key', 'in', item.value) | map('items2dict') | list
+         if _diagnose_mdbs_section is sequence and _diagnose_mdbs_section is not string else
+         ('NOT FOUND in mariadb_info output' if _diagnose_mdbs_section is none else _diagnose_mdbs_section) }}
+  loop: "{{ diagnose_mdbs_servvars | select('mapping') | map('dict2items') | flatten | list }}"
+  loop_control:
+    label: "{{ item.key }}"
+  tags:
+    - mariadb_diagnose

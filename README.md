@@ -57,7 +57,9 @@ See the
 
 ## Roadmap
 
-<!-- Optional. Include the roadmap for this collection, and the proposed release/versioning strategy so users can anticipate the upgrade/update cycle. -->
+* [ ] finish role `diagnose_mdbs`
+* [ ] document all roles
+* [ ] mark releases
 
 ## More information
 

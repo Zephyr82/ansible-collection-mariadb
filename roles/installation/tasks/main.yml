@@ -25,3 +25,5 @@
     enabled: true
     name: "{{ installation_mariadb_service }}"
     state: started
+  tags:
+    - mariadb_installation
